@@ -10,6 +10,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Person;
+use App\Service\PersonService;
 use App\Repository\EmploymentRepository;
 use OA\Items;
 use OA\Schema;
@@ -26,6 +27,40 @@ class PersonController extends AbstractController
         $this->personService=$personService;
     }
 
+    #[Route('/persons', name: 'person_index', methods:['get'] )]
+    public function index(ManagerRegistry $doctrine): JsonResponse
+    {
+        $persons = $this->em
+            ->getRepository(Person::class)
+            ->findAllPersons();
+
+        $data = [];
+
+        foreach ($persons as $person) {
+
+            $listEmployment=[];
+            $employments = $person->getEmployments();
+            foreach ($employments as $employment) {
+
+                array_push($listEmployment,
+                    ['companyName' => $employment->getCompanyName(),
+                     'position' => $employment->getPosition()
+                    ]
+                    );
+            }
+
+            $data[] = [
+                'id' => $person->getId(),
+                'lastname' => $person->getLastname(),
+                'firstname' => $person->getFirstname(),
+                'birthday' => $person->getBirthday(),
+                'age' => $person->getAge(),
+                'employments' => $listEmployment
+            ];
+        }
+
+        return $this->json($data);
+    }
 
 
 }

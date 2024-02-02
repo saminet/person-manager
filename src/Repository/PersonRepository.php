@@ -20,6 +20,17 @@ class PersonRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Person::class);
     }
+
+    public function findAllPersons()
+    {
+        $query = $this->createQueryBuilder('p')
+            ->addSelect('e')
+            ->leftJoin('p.employments', 'e')
+            ->orderBy('p.lastname', 'ASC')
+            ->getQuery();
+
+        return $query->getResult();
+    }
 }
 
 
