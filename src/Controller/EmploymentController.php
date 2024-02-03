@@ -79,4 +79,36 @@ class EmploymentController extends AbstractController
         return $this->json($data);
     }
 
+    #[Route('/persons-by-company', name: 'find_person_by_company', methods:['post'] )]
+    #[OA\RequestBody(
+        description: "Chercher les personnes selon la société",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'company', type:'string')
+            ]
+        )
+    )]
+    public function findPersonByCompany(Request $request, ManagerRegistry $doctrine): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $comapnies = $this->em
+            ->getRepository(Employment::class)
+            ->findByCompany($data['company']);
+
+        $data = [];
+
+        foreach ($comapnies as $company) {
+            $data[] = [
+                'company' => $company->getCompanyName(),
+                'emploi' => $company->getPosition(),
+                'firstname' => $company->getPerson()->getFirstname(),
+                'lastname' => $company->getPerson()->getLastname(),
+                'birthday' => $company->getPerson()->getBirthday(),
+                'age' => $company->getPerson()->getAge()
+            ];
+        }
+
+        return $this->json($data);
+    }
+
 }

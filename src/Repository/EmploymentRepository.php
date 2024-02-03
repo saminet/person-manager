@@ -22,6 +22,19 @@ class EmploymentRepository extends ServiceEntityRepository
         parent::__construct($registry, Employment::class);
     }
 
+    public function findByCompany($company)
+    {
+        $query = $this->createQueryBuilder('c')
+            ->addSelect('p')
+            ->leftJoin('c.person', 'p')
+            ->andWhere('c.companyName like :val')
+            ->setParameter('val', '%'.$company.'%')
+            ->orderBy('c.companyName', 'ASC')
+            ->getQuery();
+
+        return $query->getResult();
+    }
+
 }
 
 
