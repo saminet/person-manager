@@ -111,4 +111,39 @@ class EmploymentController extends AbstractController
         return $this->json($data);
     }
 
+    #[Route('/employments-by-date-employments/{idPerson}', name: 'find_employments_by_date_employments', methods:['post'] )]
+    #[OA\RequestBody(
+        description: "Chercher les emplois d'une personne entre deux plages de dates",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'date-start', type:'date'),
+                new OA\Property(property: 'date-end', type:'date')
+            ]
+        )
+    )]
+    public function findEmploymentsByDates(Request $request, ManagerRegistry $doctrine, int $idPerson): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $dateStart =  \DateTime::createFromFormat("Y-m-d",$data['date-start']);
+        $dateEnd = \DateTime::createFromFormat("Y-m-d",$data['date-end']);
+
+        $comapnies = $this->em
+            ->getRepository(Employment::class)
+            ->findEmploymentsByDates($idPerson, $dateStart, $dateEnd);
+
+        $data = [];
+
+        foreach ($comapnies as $company) {
+            $data[] = [
+                'id' => $company->getId(),
+                'company' => $company->getCompanyName(),
+                'emploi' => $company->getPosition(),
+                'start' => $company->getStart(),
+                'end' => $company->getEnd(),
+            ];
+        }
+
+        return $this->json($data);
+    }
+
 }

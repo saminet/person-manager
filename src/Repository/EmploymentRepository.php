@@ -35,6 +35,39 @@ class EmploymentRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
+    public function findEmploymentsByDates($personId, $dateStart, $dateEnd)
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->leftJoin('c.person', 'p')
+            ->where('p.id = :personId')
+            ->setParameter('personId', $personId);
+
+        /*if(!empty($dateStart) && !empty($dateEnd)){
+            $qb->andWhere('c.start BETWEEN :dateStart AND :dateEnd')
+                ->setParameter('dateStart', $dateStart->format('Y-m-d'))
+                ->setParameter('dateEnd', $dateEnd->format('Y-m-d'));
+        }*/
+
+        if(!empty($dateStart)){
+            $qb->andWhere('c.start >= :dateStart')
+                ->setParameter('dateStart', $dateStart->format('Y-m-d'));
+        }
+
+        if(!empty($dateEnd)){
+            $qb->andWhere('c.end <= :dateEnd')
+                ->setParameter('dateEnd', $dateEnd->format('Y-m-d'));
+        }
+
+        $query =
+        $qb
+        ->orderBy('c.companyName', 'ASC')
+        ->getQuery();
+
+
+
+        return $query->getResult();
+    }
+
 }
 
 
