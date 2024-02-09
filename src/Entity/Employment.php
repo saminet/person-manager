@@ -6,7 +6,8 @@ use App\Repository\EmploymentRepository;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Person;
 use Doctrine\DBAL\Types\Types;
-use JMS\Serializer\Annotation\Groups;
+#use JMS\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: EmploymentRepository::class)]
 class Employment
@@ -14,12 +15,15 @@ class Employment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["company"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["company"])]
     private ?string $companyName = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["company"])]
     private ?string $position = null;
 
     #[ORM\ManyToOne(targetEntity: Person::class, inversedBy: 'employments')]
@@ -36,10 +40,6 @@ class Employment
         return $this->id;
     }
 
-    /**
-     * @return string|null
-     * @Groups({"public"})
-     */
     public function getCompanyName(): ?string
     {
         return $this->companyName;

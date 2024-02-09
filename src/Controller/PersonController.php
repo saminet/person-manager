@@ -17,6 +17,8 @@ use OA\Schema;
 use OA\JsonContent;
 use OpenApi\Attributes as OA;
 
+use Symfony\Component\Serializer\SerializerInterface;
+
 #[Route('/api', name: 'api_')]
 class PersonController extends AbstractController
 {
@@ -28,7 +30,7 @@ class PersonController extends AbstractController
     }
 
     #[Route('/persons', name: 'person_index', methods:['get'] )]
-    public function index(ManagerRegistry $doctrine): JsonResponse
+    public function index(SerializerInterface $serializer): JsonResponse
     {
         $persons = $this->em
             ->getRepository(Person::class)
@@ -38,7 +40,7 @@ class PersonController extends AbstractController
 
         foreach ($persons as $person) {
 
-            $listEmployment=[];
+            /*$listEmployment=[];
             $employments = $person->getEmployments();
             foreach ($employments as $employment) {
 
@@ -47,7 +49,10 @@ class PersonController extends AbstractController
                      'position' => $employment->getPosition()
                     ]
                     );
-            }
+            }*/
+
+            $employments = $person->getEmployments();
+            $employments = $serializer->serialize($employments,'json', ['groups' => ['company']]);
 
             $data[] = [
                 'id' => $person->getId(),
@@ -55,7 +60,8 @@ class PersonController extends AbstractController
                 'firstname' => $person->getFirstname(),
                 'birthday' => $person->getBirthday(),
                 'age' => $person->getAge(),
-                'employments' => $listEmployment
+                //'employments' => $listEmployment,
+                'employments' => json_decode($employments, true, JSON_UNESCAPED_SLASHES)
             ];
         }
 
